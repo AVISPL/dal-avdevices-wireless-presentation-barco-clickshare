@@ -291,22 +291,22 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
      * */
     private void requestNetworkConfiguration(Map<String, String> statistics) throws Exception {
         JsonNode response = doGet(CONFIGURATION_NETWORK, JsonNode.class);
-        addStatisticsProperty(statistics, "Network#Hostname", response.get("hostname"));
+        addStatisticsProperty(statistics, "Network configuration#Hostname", response.get("hostname"));
 
         JsonNode proxy = response.get("services").get("proxy");
         JsonNode dhcpServer = response.get("services").get("dhcpServer");
 
         boolean proxyEnabled = proxy.get("enabled").asBoolean();
-        statistics.put("Network#Proxy", proxyEnabled ? "enabled" : "disabled");
+        statistics.put("Network configuration#Proxy", proxyEnabled ? "enabled" : "disabled");
         if(proxyEnabled){
-            addStatisticsProperty(statistics, "Network#Proxy server address", proxy.get("serverAddress"));
-            addStatisticsProperty(statistics, "Network#Proxy username", proxy.get("username"));
+            addStatisticsProperty(statistics, "Network configuration#Proxy server address", proxy.get("serverAddress"));
+            addStatisticsProperty(statistics, "Network configuration#Proxy username", proxy.get("username"));
         }
 
-        addStatisticsProperty(statistics, "Network#DHCP Domain name", dhcpServer.get("domainName"));
-        addStatisticsProperty(statistics, "Network#DHCP MAX address", dhcpServer.get("maxAddress"));
-        addStatisticsProperty(statistics, "Network#DHCP MIN address", dhcpServer.get("minAddress"));
-        addStatisticsProperty(statistics, "Network#DHCP Subnet mask", dhcpServer.get("subnetMask"));
+        addStatisticsProperty(statistics, "Network configuration#DHCP Domain name", dhcpServer.get("domainName"));
+        addStatisticsProperty(statistics, "Network configuration#DHCP MAX address", dhcpServer.get("maxAddress"));
+        addStatisticsProperty(statistics, "Network configuration#DHCP MIN address", dhcpServer.get("minAddress"));
+        addStatisticsProperty(statistics, "Network configuration#DHCP Subnet mask", dhcpServer.get("subnetMask"));
 
         populateNetworkConfigurationData(response, "wired", statistics);
         populateNetworkConfigurationData(response, "wireless", statistics);
@@ -325,13 +325,13 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
         }
         networkProperties.elements().forEachRemaining(jsonNode -> {
             int id = jsonNode.get("id").asInt();
-            addStatisticsProperty(statistics, String.format("Network %s#Configuration %s Operation Mode", key, id), jsonNode.get("operationMode"));
-            addStatisticsProperty(statistics, String.format("Network %s#Configuration %s Addressing", key, id), jsonNode.get("addressing"));
-            addStatisticsProperty(statistics, String.format("Network %s#Configuration %s Status", key, id), jsonNode.get("status"));
-            addStatisticsProperty(statistics, String.format("Network %s#Configuration %s Ip Address", key, id), jsonNode.get("ipAddress"));
-            addStatisticsProperty(statistics, String.format("Network %s#Configuration %s Subnet Mask", key, id), jsonNode.get("subnetMask"));
-            addStatisticsProperty(statistics, String.format("Network %s#Configuration %s Default Gateway", key, id), jsonNode.get("defaultGateway"));
-            addStatisticsProperty(statistics, String.format("Network %s#Configuration %s MAC Address", key, id), jsonNode.get("macAddress"));
+            addStatisticsProperty(statistics, String.format("Network configuration: %s#Configuration %s Operation Mode", key, id), jsonNode.get("operationMode"));
+            addStatisticsProperty(statistics, String.format("Network configuration: %s#Configuration %s Addressing", key, id), jsonNode.get("addressing"));
+            addStatisticsProperty(statistics, String.format("Network configuration: %s#Configuration %s Status", key, id), jsonNode.get("status"));
+            addStatisticsProperty(statistics, String.format("Network configuration: %s#Configuration %s Ip Address", key, id), jsonNode.get("ipAddress"));
+            addStatisticsProperty(statistics, String.format("Network configuration: %s#Configuration %s Subnet Mask", key, id), jsonNode.get("subnetMask"));
+            addStatisticsProperty(statistics, String.format("Network configuration: %s#Configuration %s Default Gateway", key, id), jsonNode.get("defaultGateway"));
+            addStatisticsProperty(statistics, String.format("Network configuration: %s#Configuration %s MAC Address", key, id), jsonNode.get("macAddress"));
         });
     }
 
