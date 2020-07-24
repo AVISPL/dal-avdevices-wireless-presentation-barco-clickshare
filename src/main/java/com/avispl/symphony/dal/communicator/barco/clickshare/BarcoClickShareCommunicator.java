@@ -147,17 +147,17 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
     public List<Statistics> getMultipleStatistics() throws Exception {
         ExtendedStatistics extendedStatistics = new ExtendedStatistics();
 
-        if(isValidControlCoolDown() && localStatistics != null){
-            if (logger.isDebugEnabled()) {
-                logger.debug("Device is occupied. Skipping statistics refresh call.");
-            }
-            extendedStatistics.setStatistics(localStatistics.getStatistics());
-            extendedStatistics.setControllableProperties(localStatistics.getControllableProperties());
-            return Collections.singletonList(extendedStatistics);
-        }
-
         controlOperationsLock.lock();
         try {
+            if(isValidControlCoolDown() && localStatistics != null){
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Device is occupied. Skipping statistics refresh call.");
+                }
+                extendedStatistics.setStatistics(localStatistics.getStatistics());
+                extendedStatistics.setControllableProperties(localStatistics.getControllableProperties());
+                return Collections.singletonList(extendedStatistics);
+            }
+
             Map<String, String> statistics = new HashMap<>();
             List<AdvancedControllableProperty> controls = new ArrayList<>();
 
