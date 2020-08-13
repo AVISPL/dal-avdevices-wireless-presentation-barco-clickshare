@@ -3,6 +3,7 @@
  */
 package com.avispl.symphony.dal.communicator.barco.clickshare;
 
+import com.avispl.symphony.api.dal.dto.control.ControllableProperty;
 import com.avispl.symphony.api.dal.dto.monitor.ExtendedStatistics;
 import com.avispl.symphony.api.dal.dto.monitor.Statistics;
 import org.junit.Assert;
@@ -11,17 +12,17 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class BarcoClickShareCommunicatorTest {
+public class BarcoClickShareV1CommunicatorTest {
     private static final String host = "***REMOVED***";
     private static final String protocol = "https";
-    private static final String login = "admin";
-    private static final String password = "12345";
-    private static final int port = 4003;
+    private static final String login = "integrator";
+    private static final String password = "integrator";
+    private static final int port = 4001;
 
     private BarcoClickShareCommunicator communicator;
 
     @BeforeEach
-    public void init() throws Exception {
+    public void setUp() throws Exception {
         communicator = new BarcoClickShareCommunicator();
         communicator.setTrustAllCertificates(true);
         communicator.setHost(host);
@@ -37,12 +38,17 @@ public class BarcoClickShareCommunicatorTest {
         List<Statistics> statistics = communicator.getMultipleStatistics();
         Assert.assertNotNull(statistics.get(0));
         Assert.assertEquals(1, statistics.size());
-        Assert.assertEquals("***REMOVED***", ((ExtendedStatistics)statistics.get(0)).getStatistics().get("Network configuration: wired#Configuration 1 Ip Address"));
-        Assert.assertEquals("HDMI", ((ExtendedStatistics)statistics.get(0)).getStatistics().get("Audio Output"));
-        Assert.assertEquals("ClickShare-1863550376", ((ExtendedStatistics)statistics.get(0)).getStatistics().get("Personalization#Meeting room name"));
-        Assert.assertEquals("00:04:A5:01:04:78", ((ExtendedStatistics)statistics.get(0)).getStatistics().get("Network configuration: wired#Configuration 1 MAC Address"));
-        Assert.assertEquals("R9861522EU", ((ExtendedStatistics)statistics.get(0)).getStatistics().get("Device information#Article number"));
-        Assert.assertEquals("ClickShare-1863550376", ((ExtendedStatistics)statistics.get(0)).getStatistics().get("Network configuration#Hostname"));
+        Assert.assertEquals("1873200822", ((ExtendedStatistics)statistics.get(0)).getStatistics().get("Serial Number"));
+        Assert.assertEquals("CSE-200+", ((ExtendedStatistics)statistics.get(0)).getStatistics().get("Model Name"));
         Assert.assertEquals(14, ((ExtendedStatistics)statistics.get(0)).getControllableProperties().size());
+    }
+
+    @Test
+    public void testAirplayControl() throws Exception{
+        communicator.getMultipleStatistics();
+        ControllableProperty property = new ControllableProperty();
+        property.setValue(1);
+        property.setProperty("Features#Airplay");
+        communicator.controlProperty(property);
     }
 }
