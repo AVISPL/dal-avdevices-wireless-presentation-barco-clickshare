@@ -6,6 +6,7 @@ package com.avispl.symphony.dal.communicator.barco.clickshare;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -17,13 +18,17 @@ final class BarcoClickShareProperties {
 
     public static final Map<Integer, String> DEVICE_STATUSES = ImmutableMap.of(0, "OK", 1, "Warning", 2, "Error");
     public static final List<String> TIMEOUTS = Arrays.asList("Infinite", "1", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60");
+    public static final List<String> CSE800_DISPLAY_TIMEOUTS = Arrays.asList("Infinite", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60");
     public static final List<String> AUDIO_OUTPUT_MODES = Arrays.asList("Jack", "HDMI", "SPDIF");
-    public static final List<String> ENERGY_MODES = Arrays.asList("eco_standby");
+    public static final List<String> ENERGY_MODES = Arrays.asList("eco_standby", "networked_standby");
+    public static final List<String> CSE200_ENERGY_MODES = Collections.singletonList("eco_standby");
+    public static final List<String> CSE800_ENERGY_MODES_LABELS = Arrays.asList("eco_standby", "networked_standby (enable CNI)");
     public static final List<String> SOFTWARE_UPDATE_TYPES = Arrays.asList("AUTOMATIC", "NOTIFY", "OFF");
     public static final List<String> SCREENSAVER_MODE_NAMES = Arrays.asList("Default", "HDMI");
 
     public static final String V1_DISPLAY = "Display";
     public static final String V1_DISPLAY_TIMEOUT = "Display/DisplayTimeout";
+    public static final String V1_DISPLAY_STANDBY_STATE = "Display/StandbyState";
     public static final String V1_SCREENSAVER_TIMEOUT = "Display/ScreenSaverTimeout";
     public static final String V1_SHOW_WALLPAPER = "Display/ShowWallpaper";
     public static final String V1_DISPLAY_RESOLUTION = "Display/OutputTable/%s/Resolution";
@@ -82,6 +87,7 @@ final class BarcoClickShareProperties {
     public static final String POWER_STATUS_NAME = "Power Management#Power Status";
     public static final String STANDBY_TIMEOUT_NAME = "Power Management#Standby Timeout (min)";
     public static final String DISPLAY_TIMEOUT_NAME = "Display#Display Timeout";
+    public static final String DISPLAY_STANDBY_NAME = "Display#Standby";
     public static final String DISPLAY_WALLPAPER = "Display#Show Wallpaper";
     public static final String SCREENSAVER_MODE_NAME = "Display#Screensaver Mode";
     public static final String SCREENSAVER_TIMEOUT_NAME = "Display#Screensaver Timeout";
@@ -103,4 +109,8 @@ final class BarcoClickShareProperties {
     public static final String ECO_STANDBY_V1 = "eco_standby";
     public static final String DEEP_STANDBY_V2 = "DeepStandby";
     public static final String DEEP_STANDBY_V1 = "deep_standby";
+
+    /*DEVICE MODELS*/
+    public static final String CSE800 = "CSE-800";
+    public static final String CSE200 = "CSE-200";
 }

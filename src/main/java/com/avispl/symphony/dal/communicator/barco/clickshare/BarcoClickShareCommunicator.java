@@ -200,9 +200,14 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
                     if(isApiV2Supported()) {
                         requestStandby();
                     } else {
-                        putDeviceMode(V1_6_REQUEST_STANDBY, "value", "0".equals(value) ? "false" : "true", property);
+                        boolean success = putDeviceMode(V1_6_REQUEST_STANDBY, "value", "0".equals(value) ? "false" : "true", property);
+                        if(success){
+                            localStatistics.getStatistics().put(POWER_STATUS_NAME, "0".equals(value) ? "On" : "Standby");
+                        }
                     }
                     break;
+                case DISPLAY_STANDBY_NAME:
+                    putDeviceMode(V1_DISPLAY_STANDBY_STATE, "value", "0".equals(value) ? "false" : "true", property);
                 default:
                     if(logger.isWarnEnabled()){
                         logger.warn(String.format("Operation %s with value %s is not supported.", property, value));
@@ -363,7 +368,6 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
     private void v1_0_RequestDeviceInfo(Map<String, String> statistics, List<AdvancedControllableProperty> controls) throws Exception {
         JsonNode deviceInfo = getApiV1JsonNode(supportedApiVersion + V1_DEVICE_INFO);
         JsonNode audioEnabled = getApiV1JsonNode(supportedApiVersion + V1_AUDIO_ENABLED);
-        JsonNode display = getApiV1JsonNode(supportedApiVersion + V1_DISPLAY);
 
         deviceModel = deviceInfo.get("ModelName").asText();
 
@@ -383,7 +387,6 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
         statistics.put("Device Sensors#Pcie Temperature", deviceInfo.get("Sensors").get("PcieTemperature").asText());
         statistics.put("Device Sensors#Sio Temperature", deviceInfo.get("Sensors").get("SioTemperature").asText());
         addStatisticsProperty(statistics, "Last used", deviceInfo.get("LastUsed"));
-        addStatisticsProperty(statistics, "Display#Standby State", display.get("StandbyState"));
 
         for(int i = 1; i < deviceInfo.get("Processes").get("ProcessCount").asInt() + 1; i++){
             JsonNode process = deviceInfo.get("Processes").get("ProcessTable").get(String.valueOf(i));
@@ -392,10 +395,26 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
 
         statistics.put(AUDIO_NAME, "");
         controls.add(createSwitch(AUDIO_NAME, "enabled", "disabled", audioEnabled.asBoolean()));
+        statistics.put(REBOOT_NAME, "");
+        controls.add(createButton(REBOOT_NAME, REBOOT_NAME, "Rebooting...", 90000));
+
+        setDisplayStatistics(statistics, controls);
+    }
+
+    /**
+     * Collecting statistics related to display data for API V1.0
+     * @param statistics map to store statistics data to
+     * @param controls list to add controllable properties to
+     * @throws Exception during http communication
+     */
+    private void setDisplayStatistics(Map<String, String> statistics, List<AdvancedControllableProperty> controls) throws Exception {
+        JsonNode display = getApiV1JsonNode(supportedApiVersion + V1_DISPLAY);
+        statistics.put(DISPLAY_STANDBY_NAME, "");
+        controls.add(createSwitch(DISPLAY_STANDBY_NAME, "On", "Off", display.get("StandbyState").asBoolean()));
 
         statistics.put("Display#Display Count", display.get("DisplayCount").asText());
         statistics.put(DISPLAY_TIMEOUT_NAME, "");
-        controls.add(createDropdown(DISPLAY_TIMEOUT_NAME, display.get("DisplayTimeout").asText(), TIMEOUTS));
+        controls.add(createDropdown(DISPLAY_TIMEOUT_NAME, display.get("DisplayTimeout").asText(), deviceModel.equals(CSE800) ? CSE800_DISPLAY_TIMEOUTS : TIMEOUTS));
 
         statistics.put("Display#Hot Plug", display.get("HotPlug").asText());
         statistics.put(SCREENSAVER_TIMEOUT_NAME, "");
@@ -416,9 +435,6 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
             controls.add(createDropdown(String.format("Display#Output %s Resolution", i), currentNode.get("Resolution").asText(),
                     Arrays.asList(currentNode.get("SupportedResolutions").asText().split(","))));
         }
-
-        statistics.put(REBOOT_NAME, "");
-        controls.add(createButton(REBOOT_NAME, REBOOT_NAME, "Rebooting...", 90000));
     }
 
     /**
@@ -431,17 +447,7 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
         String audioOutput = getApiV1JsonNode(supportedApiVersion + V1_5_AUDIO_OUTPUT).asText();
         String powerMode = getApiV1JsonNode(supportedApiVersion + V1_5_ENERGY_MODE).asText();
         if(deviceModel != null){
-            List<String> energyModes = new ArrayList<>(ENERGY_MODES);
-            List<String> energyModesLabels = new ArrayList<>(ENERGY_MODES);
-            if(!deviceModel.equals("CSE-200")){
-                energyModes.add("networked_standby");
-                if(deviceModel.equals("CSE-800")){
-                    energyModesLabels.add("networked_standby (enable CNI)");
-                } else {
-                    energyModesLabels.add("networked_standby");
-                }
-            }
-            if(powerMode.equals(DEEP_STANDBY_V2)){
+            if(powerMode.equals(DEEP_STANDBY_V1)){
                 putDeviceMode(V1_5_ENERGY_MODE, "powerMode", ECO_STANDBY_V1, POWER_MODE_NAME);
                 powerMode = ECO_STANDBY_V1;
                 if(logger.isDebugEnabled()){
@@ -449,7 +455,13 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
                 }
             }
             statistics.put(POWER_MODE_NAME, powerMode);
-            controls.add(createDropdown(POWER_MODE_NAME, powerMode, energyModesLabels, energyModes));
+            if(deviceModel.equals(CSE200)){
+                controls.add(createDropdown(POWER_MODE_NAME, powerMode, CSE200_ENERGY_MODES, CSE200_ENERGY_MODES));
+            } else if(deviceModel.equals(CSE800)){
+                controls.add(createDropdown(POWER_MODE_NAME, powerMode, CSE800_ENERGY_MODES_LABELS, ENERGY_MODES));
+            } else {
+                controls.add(createDropdown(POWER_MODE_NAME, powerMode, ENERGY_MODES, ENERGY_MODES));
+            }
 
             statistics.put(AUDIO_OUTPUT_NAME, audioOutput);
             controls.add(createDropdown(AUDIO_OUTPUT_NAME, audioOutput, AUDIO_OUTPUT_MODES));
@@ -463,9 +475,10 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
      * @throws Exception during http communication
      */
     private void v1_6_RequestDeviceInfo(Map<String, String> statistics, List<AdvancedControllableProperty> controls) throws Exception {
-        statistics.put(POWER_STATUS_NAME, getApiV1JsonNode(supportedApiVersion + V1_6_SYSTEM_STATE).asText());
+        String powerStatusName = getApiV1JsonNode(supportedApiVersion + V1_6_SYSTEM_STATE).asText();
+        statistics.put(POWER_STATUS_NAME, powerStatusName);
         statistics.put(STANDBY_NAME, "");
-        controls.add(createSwitch(STANDBY_NAME, "On", "Off", getApiV1JsonNode(supportedApiVersion + V1_6_REQUEST_STANDBY).asBoolean()));
+        controls.add(createSwitch(STANDBY_NAME, "On", "Off", powerStatusName.equals("Standby")));
     }
 
     /**
