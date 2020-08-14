@@ -115,6 +115,15 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
                         putDeviceMode(V1_5_ENERGY_MODE, "value", value, property);
                     }
                     break;
+                case ONSCREEN_LANGUAGE_NAME:
+                    putDeviceMode(V1_ON_SCREEN_TEXT_LANGUAGE, "value", value, property);
+                    break;
+                case ONSCREEN_WELCOME_MESSAGE_NAME:
+                    putDeviceMode(V1_ON_SCREEN_TEXT_WELCOME_MESSAGE, "value", value, property);
+                    break;
+                case ONSCREEN_MEETING_ROOM_NAME:
+                    putDeviceMode(V1_ON_SCREEN_TEXT_MEETING_ROOM_NAME, "value", value, property);
+                    break;
                 case POWER_STATUS_NAME:
                     patchDeviceMode(POWER_MANAGEMENT, "status", value, property);
                     break;
@@ -123,6 +132,31 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
                     break;
                 case VIDEO_MODE_NAME:
                     patchDeviceMode(CONFIGURATION_VIDEO,"mode", value, property);
+                    break;
+                case SOFTWARE_UPDATE_NAME:
+                    putDeviceMode(V1_7_UPDATE_TYPE, "value", value, property);
+                    break;
+                case AUDIO_OUTPUT_NAME:
+                    if(isApiV2Supported()) {
+                        patchDeviceMode(CONFIGURATION_AUDIO, "output", value, property);
+                    } else {
+                        putDeviceMode(V1_5_AUDIO_OUTPUT, "value", value, property);
+                    }
+                    break;
+                case SCREENSAVER_MODE_NAME:
+                    putDeviceMode(V1_14_SCREEN_SAVER_MODE, "value", value, property);
+                    break;
+                case DISPLAY_TIMEOUT_NAME:
+                    putDeviceMode(V1_DISPLAY_TIMEOUT, "value", value, property);
+                    break;
+                case SCREENSAVER_TIMEOUT_NAME:
+                    putDeviceMode(V1_SCREENSAVER_TIMEOUT, "value", value, property);
+                    break;
+                case LANGUAGE_NAME:
+                    patchDeviceMode(PERSONALIZATION, "language", value, property);
+                    break;
+                case WELCOME_MESSAGE_NAME:
+                    patchDeviceMode(PERSONALIZATION, "welcomeMessage", value, property);
                     break;
                 case MIRACAST_NAME:
                     if(isApiV2Supported()) {
@@ -158,8 +192,11 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
                 case ACCESS_OVER_LAN_NAME:
                     putDeviceMode(V1_8_ENABLE_OVER_LAN, "value", "0".equals(value) ? "false" : "true", property);
                     break;
-                case SOFTWARE_UPDATE_NAME:
-                    putDeviceMode(V1_7_UPDATE_TYPE, "value", value, property);
+                case ONSCREEN_MEETING_ROOM_INFO_NAME:
+                    putDeviceMode(V1_ON_SCREEN_TEXT_SHOW_MEETING_ROOM, "value", "0".equals(value) ? "false" : "true", property);
+                    break;
+                case ONSCREEN_NETWORK_INFO_NAME:
+                    putDeviceMode(V1_ON_SCREEN_TEXT_SHOW_NETWORK, "value", "0".equals(value) ? "false" : "true", property);
                     break;
                 case AUDIO_NAME:
                     if(isApiV2Supported()) {
@@ -171,30 +208,8 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
                 case DISPLAY_WALLPAPER:
                     putDeviceMode(V1_SHOW_WALLPAPER, "value",  "0".equals(value) ? "false" : "true", property);
                     break;
-                case AUDIO_OUTPUT_NAME:
-                    if(isApiV2Supported()) {
-                        patchDeviceMode(CONFIGURATION_AUDIO, "output", value, property);
-                    } else {
-                        putDeviceMode(V1_5_AUDIO_OUTPUT, "value", value, property);
-                    }
-                    break;
-                case SCREENSAVER_MODE_NAME:
-                    putDeviceMode(V1_14_SCREEN_SAVER_MODE, "value", value, property);
-                    break;
-                case DISPLAY_TIMEOUT_NAME:
-                    putDeviceMode(V1_DISPLAY_TIMEOUT, "value", value, property);
-                    break;
-                case SCREENSAVER_TIMEOUT_NAME:
-                    putDeviceMode(V1_SCREENSAVER_TIMEOUT, "value", value, property);
-                    break;
-                case LANGUAGE_NAME:
-                    patchDeviceMode(PERSONALIZATION, "language", value, property);
-                    break;
-                case WELCOME_MESSAGE_NAME:
-                    patchDeviceMode(PERSONALIZATION, "welcomeMessage", value, property);
-                    break;
-                case REBOOT_NAME:
-                    requestReboot();
+                case DISPLAY_HOTPLUG_NAME:
+                    putDeviceMode(V1_DISPLAY_HOT_PLUG, "value", "0".equals(value) ? "false" : "true", property);
                     break;
                 case STANDBY_NAME:
                     if(isApiV2Supported()) {
@@ -208,6 +223,9 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
                     break;
                 case DISPLAY_STANDBY_NAME:
                     putDeviceMode(V1_DISPLAY_STANDBY_STATE, "value", "0".equals(value) ? "false" : "true", property);
+                case REBOOT_NAME:
+                    requestReboot();
+                    break;
                 default:
                     if(logger.isWarnEnabled()){
                         logger.warn(String.format("Operation %s with value %s is not supported.", property, value));
@@ -383,9 +401,9 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
         statistics.put("Device Status#Sharing", deviceInfo.get("Sharing").asText());
         addStatisticsProperty(statistics, "Device Status#Status Message", deviceInfo.get("StatusMessage"));
 
-        statistics.put("Device Sensors#Cpu Temperature", deviceInfo.get("Sensors").get("CpuTemperature").asText());
-        statistics.put("Device Sensors#Pcie Temperature", deviceInfo.get("Sensors").get("PcieTemperature").asText());
-        statistics.put("Device Sensors#Sio Temperature", deviceInfo.get("Sensors").get("SioTemperature").asText());
+        statistics.put("Device Sensors#Cpu Temperature (C)", deviceInfo.get("Sensors").get("CpuTemperature").asText());
+        statistics.put("Device Sensors#Pcie Temperature (C)", deviceInfo.get("Sensors").get("PcieTemperature").asText());
+        statistics.put("Device Sensors#Sio Temperature (C)", deviceInfo.get("Sensors").get("SioTemperature").asText());
         addStatisticsProperty(statistics, "Last used", deviceInfo.get("LastUsed"));
 
         for(int i = 1; i < deviceInfo.get("Processes").get("ProcessCount").asInt() + 1; i++){
@@ -399,8 +417,26 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
         controls.add(createButton(REBOOT_NAME, REBOOT_NAME, "Rebooting...", 90000));
 
         setDisplayStatistics(statistics, controls);
+        setOnScreenTextStatistics(statistics, controls);
     }
 
+    private void setOnScreenTextStatistics(Map<String, String> statistics, List<AdvancedControllableProperty> controls) throws Exception{
+        JsonNode display = getApiV1JsonNode(supportedApiVersion + V1_ON_SCREEN_TEXT);
+        statistics.put(ONSCREEN_LANGUAGE_NAME, "");
+        controls.add(createDropdown(ONSCREEN_LANGUAGE_NAME, display.get("Language").asText(), Arrays.asList(display.get("SupportedLanguages").asText().split(","))));
+
+        statistics.put(ONSCREEN_WELCOME_MESSAGE_NAME, "");
+        controls.add(createText(ONSCREEN_WELCOME_MESSAGE_NAME, display.get("WelcomeMessage").asText()));
+
+        statistics.put(ONSCREEN_MEETING_ROOM_NAME, "");
+        controls.add(createText(ONSCREEN_MEETING_ROOM_NAME, display.get("MeetingRoomName").asText()));
+
+        statistics.put(ONSCREEN_MEETING_ROOM_INFO_NAME, "");
+        controls.add(createSwitch(ONSCREEN_MEETING_ROOM_INFO_NAME, "On", "Off", display.get("ShowNetworkInfo").asBoolean()));
+
+        statistics.put(ONSCREEN_NETWORK_INFO_NAME, "");
+        controls.add(createSwitch(ONSCREEN_NETWORK_INFO_NAME, "On", "Off", display.get("ShowMeetingRoomInfo").asBoolean()));
+    }
     /**
      * Collecting statistics related to display data for API V1.0
      * @param statistics map to store statistics data to
@@ -416,7 +452,8 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
         statistics.put(DISPLAY_TIMEOUT_NAME, "");
         controls.add(createDropdown(DISPLAY_TIMEOUT_NAME, display.get("DisplayTimeout").asText(), deviceModel.equals(CSE800) ? CSE800_DISPLAY_TIMEOUTS : TIMEOUTS));
 
-        statistics.put("Display#Hot Plug", display.get("HotPlug").asText());
+        statistics.put(DISPLAY_HOTPLUG_NAME, "");
+        controls.add(createSwitch(DISPLAY_HOTPLUG_NAME, "On", "Off", display.get("HotPlug").asBoolean()));
         statistics.put(SCREENSAVER_TIMEOUT_NAME, "");
         controls.add(createDropdown(SCREENSAVER_TIMEOUT_NAME, display.get("ScreenSaverTimeout").asText(), TIMEOUTS));
 
@@ -526,8 +563,8 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
     private void v1_11_RequestDeviceInfo(Map<String, String> statistics) throws Exception {
         addStatisticsProperty(statistics, "Network#Wlan IP Address", getApiV1JsonNode(supportedApiVersion + V1_11_WLAN_IP_ADDRESS));
         addStatisticsProperty(statistics, "Network#Wlan Subnet Mask", getApiV1JsonNode(supportedApiVersion + V1_11_WLAN_SUBNET_MASK));
-        addStatisticsProperty(statistics, "Display#CEC", getApiV1JsonNode(supportedApiVersion + V1_11_DISPLAY_CEC));
         addStatisticsProperty(statistics, "Device Sensors#Cpu Fan Speed", getApiV1JsonNode(supportedApiVersion + V1_11_CPU_FAN_SPEED));
+        addStatisticsProperty(statistics, "Display#CEC", getApiV1JsonNode(supportedApiVersion + V1_11_DISPLAY_CEC));
     }
 
     /**
@@ -921,7 +958,7 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
         if(isApiV2Supported()) {
             return doPost(supportedApiVersion + OPERATIONS_REBOOT, null, JsonNode.class).get("status").asInt() == 202;
         } else {
-            return doPost(supportedApiVersion + V1_RESTART_SYSTEM, null, JsonNode.class).get("status").asInt() == 200;
+            return doPut(supportedApiVersion + V1_RESTART_SYSTEM, "value=true", JsonNode.class).get("status").asInt() == 200;
         }
     }
 
