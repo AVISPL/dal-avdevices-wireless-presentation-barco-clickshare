@@ -13,6 +13,9 @@ import java.util.Map;
 final class BarcoClickShareProperties {
     public static final String API_SUPPORTED_VERSIONS = "supportedVersions";
 
+    public static final int V1_REBOOT_GRACE_PERIOD = 120000;
+    public static final int V2_REBOOT_GRACE_PERIOD = 90000;
+
     public static final Map<Integer, String> DEVICE_STATUSES = ImmutableMap.of(0, "OK", 1, "Warning", 2, "Error");
     public static final List<String> TIMEOUTS = Arrays.asList("Infinite", "1", "5", "10", "15", "30", "45", "60");
     public static final List<String> CSE800_DISPLAY_TIMEOUTS = Arrays.asList("Infinite", "5", "10", "15", "30", "45", "60");
