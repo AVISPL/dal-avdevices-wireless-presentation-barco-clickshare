@@ -107,130 +107,136 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
                 putDeviceMode(String.format(V1_DISPLAY_RESOLUTION, displayNumber), "value", value, property);
                 return;
             }
-            switch (property){
-                case POWER_MODE_NAME:
-                    if(isApiV2Supported()) {
+
+            if(isApiV2Supported()){
+                switch (property){
+                    case POWER_MODE_NAME:
                         patchDeviceMode(POWER_MANAGEMENT, "powerMode", value, property);
-                    } else {
-                        putDeviceMode(V1_5_ENERGY_MODE, "value", value, property);
-                    }
-                    break;
-                case ONSCREEN_LANGUAGE_NAME:
-                    putDeviceMode(V1_ON_SCREEN_TEXT_LANGUAGE, "value", value, property);
-                    break;
-                case ONSCREEN_WELCOME_MESSAGE_NAME:
-                    putDeviceMode(V1_ON_SCREEN_TEXT_WELCOME_MESSAGE, "value", value, property);
-                    break;
-                case ONSCREEN_MEETING_ROOM_NAME:
-                    putDeviceMode(V1_ON_SCREEN_TEXT_MEETING_ROOM_NAME, "value", value, property);
-                    break;
-                case POWER_STATUS_NAME:
-                    patchDeviceMode(POWER_MANAGEMENT, "status", value, property);
-                    break;
-                case STANDBY_TIMEOUT_NAME:
-                    patchDeviceMode(POWER_MANAGEMENT,"standbyTimeout", value, property);
-                    break;
-                case VIDEO_MODE_NAME:
-                    patchDeviceMode(CONFIGURATION_VIDEO,"mode", value, property);
-                    break;
-                case SOFTWARE_UPDATE_NAME:
-                    putDeviceMode(V1_7_UPDATE_TYPE, "value", value, property);
-                    break;
-                case AUDIO_OUTPUT_NAME:
-                    if(isApiV2Supported()) {
+                        break;
+                    case POWER_STATUS_NAME:
+                        patchDeviceMode(POWER_MANAGEMENT, "status", value, property);
+                        break;
+                    case STANDBY_TIMEOUT_NAME:
+                        patchDeviceMode(POWER_MANAGEMENT,"standbyTimeout", value, property);
+                        break;
+                    case VIDEO_MODE_NAME:
+                        patchDeviceMode(CONFIGURATION_VIDEO,"mode", value, property);
+                        break;
+                    case AUDIO_OUTPUT_NAME:
                         patchDeviceMode(CONFIGURATION_AUDIO, "output", value, property);
-                    } else {
-                        putDeviceMode(V1_5_AUDIO_OUTPUT, "value", value, property);
-                    }
-                    break;
-                case SCREENSAVER_MODE_NAME:
-                    putDeviceMode(V1_14_SCREEN_SAVER_MODE, "value", value, property);
-                    break;
-                case DISPLAY_TIMEOUT_NAME:
-                    putDeviceMode(V1_DISPLAY_TIMEOUT, "value", value, property);
-                    break;
-                case SCREENSAVER_TIMEOUT_NAME:
-                    putDeviceMode(V1_SCREENSAVER_TIMEOUT, "value", value, property);
-                    break;
-                case LANGUAGE_NAME:
-                    patchDeviceMode(PERSONALIZATION, "language", value, property);
-                    break;
-                case WELCOME_MESSAGE_NAME:
-                    patchDeviceMode(PERSONALIZATION, "welcomeMessage", value, property);
-                    break;
-                case MIRACAST_NAME:
-                    if(isApiV2Supported()) {
+                        break;
+                    case LANGUAGE_NAME:
+                        patchDeviceMode(PERSONALIZATION, "language", value, property);
+                        break;
+                    case WELCOME_MESSAGE_NAME:
+                        patchDeviceMode(PERSONALIZATION, "welcomeMessage", value, property);
+                        break;
+                    case MIRACAST_NAME:
                         patchDeviceMode(FEATURES_MIRACAST, "enabled", "0".equals(value) ? "false" : "true", property);
-                    } else {
-                        putDeviceMode(V1_13_ENABLE_MIRACAST, "value", "0".equals(value) ? "false" : "true", property);
-                    }
-                    break;
-                case GOOGLECAST_NAME:
-                    if(isApiV2Supported()) {
+                        break;
+                    case GOOGLECAST_NAME:
                         patchDeviceMode(FEATURES_GOOGLECAST, "enabled", "0".equals(value) ? "false" : "true", property);
-                    } else {
-                        putDeviceMode(V1_8_ENABLE_GOOGLECAST, "value", "0".equals(value) ? "false" : "true", property);
-                    }
-                    break;
-                case AIRPLAY_NAME:
-                    if(isApiV2Supported()) {
+                        break;
+                    case AIRPLAY_NAME:
                         patchDeviceMode(FEATURES_AIRPLAY, "enabled", "0".equals(value) ? "false" : "true", property);
-                    } else {
-                        putDeviceMode(V1_8_ENABLE_AIRPLAY, "value", "0".equals(value) ? "false" : "true", property);
-                    }
-                    break;
-                case BLACKBOARD_SAVING_NAME:
-                    if(isApiV2Supported()) {
+                        break;
+                    case BLACKBOARD_SAVING_NAME:
                         patchDeviceMode(FEATURES_BLACKBOARD, "savingEnabled", "0".equals(value) ? "false" : "true", property);
-                    } else {
-                        putDeviceMode(V1_7_BLACKBOARD_SAVING, "value", "0".equals(value) ? "false" : "true", property);
-                    }
-                    break;
-                case CLICKSHARE_NAME:
-                    putDeviceMode(V1_8_ENABLE_CLICKSHARE_APP, "value", "0".equals(value) ? "false" : "true", property);
-                    break;
-                case ACCESS_OVER_LAN_NAME:
-                    putDeviceMode(V1_8_ENABLE_OVER_LAN, "value", "0".equals(value) ? "false" : "true", property);
-                    break;
-                case ONSCREEN_MEETING_ROOM_INFO_NAME:
-                    putDeviceMode(V1_ON_SCREEN_TEXT_SHOW_MEETING_ROOM, "value", "0".equals(value) ? "false" : "true", property);
-                    break;
-                case ONSCREEN_NETWORK_INFO_NAME:
-                    putDeviceMode(V1_ON_SCREEN_TEXT_SHOW_NETWORK, "value", "0".equals(value) ? "false" : "true", property);
-                    break;
-                case AUDIO_NAME:
-                    if(isApiV2Supported()) {
+                        break;
+                    case AUDIO_NAME:
                         patchDeviceMode(CONFIGURATION_AUDIO, "enabled", "0".equals(value) ? "false" : "true", property);
-                    } else {
-                        putDeviceMode(V1_AUDIO_ENABLED, "value", "0".equals(value) ? "false" : "true", property);
-                    }
-                    break;
-                case DISPLAY_WALLPAPER:
-                    putDeviceMode(V1_SHOW_WALLPAPER, "value",  "0".equals(value) ? "false" : "true", property);
-                    break;
-                case DISPLAY_HOTPLUG_NAME:
-                    putDeviceMode(V1_DISPLAY_HOT_PLUG, "value", "0".equals(value) ? "false" : "true", property);
-                    break;
-                case STANDBY_NAME:
-                    if(isApiV2Supported()) {
+                        break;
+                    case STANDBY_NAME:
                         requestStandby();
-                    } else {
+                        break;
+                    case REBOOT_NAME:
+                        requestReboot();
+                        break;
+                    default:
+                        if(logger.isWarnEnabled()){
+                            logger.warn(String.format("Operation %s with value %s is not supported.", property, value));
+                        }
+                        break;
+                }
+            } else {
+                switch (property){
+                    case POWER_MODE_NAME:
+                        putDeviceMode(V1_5_ENERGY_MODE, "value", value, property);
+                        break;
+                    case ONSCREEN_LANGUAGE_NAME:
+                        putDeviceMode(V1_ON_SCREEN_TEXT_LANGUAGE, "value", value, property);
+                        break;
+                    case ONSCREEN_WELCOME_MESSAGE_NAME:
+                        putDeviceMode(V1_ON_SCREEN_TEXT_WELCOME_MESSAGE, "value", value, property);
+                        break;
+                    case ONSCREEN_MEETING_ROOM_NAME:
+                        putDeviceMode(V1_ON_SCREEN_TEXT_MEETING_ROOM_NAME, "value", value, property);
+                        break;
+                    case SOFTWARE_UPDATE_NAME:
+                        putDeviceMode(V1_7_UPDATE_TYPE, "value", value, property);
+                        break;
+                    case AUDIO_OUTPUT_NAME:
+                        putDeviceMode(V1_5_AUDIO_OUTPUT, "value", value, property);
+                        break;
+                    case SCREENSAVER_MODE_NAME:
+                        putDeviceMode(V1_14_SCREEN_SAVER_MODE, "value", value, property);
+                        break;
+                    case DISPLAY_TIMEOUT_NAME:
+                        putDeviceMode(V1_DISPLAY_TIMEOUT, "value", value, property);
+                        break;
+                    case SCREENSAVER_TIMEOUT_NAME:
+                        putDeviceMode(V1_SCREENSAVER_TIMEOUT, "value", value, property);
+                        break;
+                    case MIRACAST_NAME:
+                        putDeviceMode(V1_13_ENABLE_MIRACAST, "value", "0".equals(value) ? "false" : "true", property);
+                        break;
+                    case GOOGLECAST_NAME:
+                        putDeviceMode(V1_8_ENABLE_GOOGLECAST, "value", "0".equals(value) ? "false" : "true", property);
+                        break;
+                    case AIRPLAY_NAME:
+                        putDeviceMode(V1_8_ENABLE_AIRPLAY, "value", "0".equals(value) ? "false" : "true", property);
+                        break;
+                    case BLACKBOARD_SAVING_NAME:
+                        putDeviceMode(V1_7_BLACKBOARD_SAVING, "value", "0".equals(value) ? "false" : "true", property);
+                        break;
+                    case CLICKSHARE_NAME:
+                        putDeviceMode(V1_8_ENABLE_CLICKSHARE_APP, "value", "0".equals(value) ? "false" : "true", property);
+                        break;
+                    case ACCESS_OVER_LAN_NAME:
+                        putDeviceMode(V1_8_ENABLE_OVER_LAN, "value", "0".equals(value) ? "false" : "true", property);
+                        break;
+                    case ONSCREEN_MEETING_ROOM_INFO_NAME:
+                        putDeviceMode(V1_ON_SCREEN_TEXT_SHOW_MEETING_ROOM, "value", "0".equals(value) ? "false" : "true", property);
+                        break;
+                    case ONSCREEN_NETWORK_INFO_NAME:
+                        putDeviceMode(V1_ON_SCREEN_TEXT_SHOW_NETWORK, "value", "0".equals(value) ? "false" : "true", property);
+                        break;
+                    case AUDIO_NAME:
+                        putDeviceMode(V1_AUDIO_ENABLED, "value", "0".equals(value) ? "false" : "true", property);
+                        break;
+                    case DISPLAY_WALLPAPER:
+                        putDeviceMode(V1_SHOW_WALLPAPER, "value",  "0".equals(value) ? "false" : "true", property);
+                        break;
+                    case DISPLAY_HOTPLUG_NAME:
+                        putDeviceMode(V1_DISPLAY_HOT_PLUG, "value", "0".equals(value) ? "false" : "true", property);
+                        break;
+                    case STANDBY_NAME:
                         boolean success = putDeviceMode(V1_6_REQUEST_STANDBY, "value", "0".equals(value) ? "false" : "true", property);
                         if(success){
                             localStatistics.getStatistics().put(POWER_STATUS_NAME, "0".equals(value) ? "On" : "Standby");
                         }
-                    }
-                    break;
-                case DISPLAY_STANDBY_NAME:
-                    putDeviceMode(V1_DISPLAY_STANDBY_STATE, "value", "0".equals(value) ? "false" : "true", property);
-                case REBOOT_NAME:
-                    requestReboot();
-                    break;
-                default:
-                    if(logger.isWarnEnabled()){
-                        logger.warn(String.format("Operation %s with value %s is not supported.", property, value));
-                    }
-                    break;
+                        break;
+                    case DISPLAY_STANDBY_NAME:
+                        putDeviceMode(V1_DISPLAY_STANDBY_STATE, "value", "0".equals(value) ? "false" : "true", property);
+                    case REBOOT_NAME:
+                        requestReboot();
+                        break;
+                    default:
+                        if(logger.isWarnEnabled()){
+                            logger.warn(String.format("Operation %s with value %s is not supported.", property, value));
+                        }
+                        break;
+                }
             }
         } finally {
             controlOperationsLock.unlock();
@@ -352,7 +358,7 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
 
         if(supportedOperations.contains("reboot")){
             statistics.put(REBOOT_NAME, "");
-            controls.add(createButton(REBOOT_NAME, REBOOT_NAME, "Rebooting...", 90000));
+            controls.add(createButton(REBOOT_NAME, REBOOT_NAME, "Rebooting...", V2_REBOOT_GRACE_PERIOD));
         }
         if(supportedOperations.contains("standby")){
             statistics.put(STANDBY_NAME, "");
@@ -414,14 +420,22 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
         statistics.put(AUDIO_NAME, "");
         controls.add(createSwitch(AUDIO_NAME, "enabled", "disabled", audioEnabled.asBoolean()));
         statistics.put(REBOOT_NAME, "");
-        controls.add(createButton(REBOOT_NAME, REBOOT_NAME, "Rebooting...", 90000));
+        controls.add(createButton(REBOOT_NAME, REBOOT_NAME, "Rebooting...", V1_REBOOT_GRACE_PERIOD));
 
         setDisplayStatistics(statistics, controls);
         setOnScreenTextStatistics(statistics, controls);
     }
 
+    /**
+     * Collecting statistics related to on screen text data for API V1.0
+     * @param statistics map to store statistics data to
+     * @param controls list to add controllable properties to
+     * @throws Exception during http communication
+     */
     private void setOnScreenTextStatistics(Map<String, String> statistics, List<AdvancedControllableProperty> controls) throws Exception{
         JsonNode display = getApiV1JsonNode(supportedApiVersion + V1_ON_SCREEN_TEXT);
+        statistics.put("On Screen Text#Location", display.get("Location").asText());
+
         statistics.put(ONSCREEN_LANGUAGE_NAME, "");
         controls.add(createDropdown(ONSCREEN_LANGUAGE_NAME, display.get("Language").asText(), Arrays.asList(display.get("SupportedLanguages").asText().split(","))));
 
@@ -437,6 +451,7 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
         statistics.put(ONSCREEN_NETWORK_INFO_NAME, "");
         controls.add(createSwitch(ONSCREEN_NETWORK_INFO_NAME, "On", "Off", display.get("ShowMeetingRoomInfo").asBoolean()));
     }
+
     /**
      * Collecting statistics related to display data for API V1.0
      * @param statistics map to store statistics data to
