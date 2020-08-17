@@ -131,6 +131,9 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
                     case WELCOME_MESSAGE_NAME:
                         patchDeviceMode(PERSONALIZATION, "welcomeMessage", value, property);
                         break;
+                    case MEETING_ROOM_NAME:
+                        patchDeviceMode(PERSONALIZATION, "meetingRoomName", value, property);
+                        break;
                     case MIRACAST_NAME:
                         patchDeviceMode(FEATURES_MIRACAST, "enabled", "0".equals(value) ? "false" : "true", property);
                         break;
@@ -201,9 +204,6 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
                         break;
                     case CLICKSHARE_NAME:
                         putDeviceMode(V1_8_ENABLE_CLICKSHARE_APP, "value", "0".equals(value) ? "false" : "true", property);
-                        break;
-                    case ACCESS_OVER_LAN_NAME:
-                        putDeviceMode(V1_8_ENABLE_OVER_LAN, "value", "0".equals(value) ? "false" : "true", property);
                         break;
                     case ONSCREEN_MEETING_ROOM_INFO_NAME:
                         putDeviceMode(V1_ON_SCREEN_TEXT_SHOW_MEETING_ROOM, "value", "0".equals(value) ? "false" : "true", property);
@@ -557,17 +557,14 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
         JsonNode airplay = getApiV1JsonNode(supportedApiVersion + V1_8_ENABLE_AIRPLAY);
         JsonNode clickShareApp = getApiV1JsonNode(supportedApiVersion + V1_8_ENABLE_CLICKSHARE_APP);
         JsonNode googlecast = getApiV1JsonNode(supportedApiVersion + V1_8_ENABLE_GOOGLECAST);
-        JsonNode accessOverLan = getApiV1JsonNode(supportedApiVersion + V1_8_ENABLE_OVER_LAN);
 
-        statistics.put(AIRPLAY_NAME, airplay.asText());
-        statistics.put(GOOGLECAST_NAME, googlecast.asText());
-        statistics.put(CLICKSHARE_NAME, clickShareApp.asText());
-        statistics.put(ACCESS_OVER_LAN_NAME, accessOverLan.asText());
+        addStatisticsProperty(statistics, AIRPLAY_NAME, airplay);
+        addStatisticsProperty(statistics, CLICKSHARE_NAME, clickShareApp);
+        addStatisticsProperty(statistics, GOOGLECAST_NAME, googlecast);
 
         controls.add(createSwitch(AIRPLAY_NAME, "On", "Off", airplay.asBoolean()));
-        controls.add(createSwitch(GOOGLECAST_NAME, "On", "Off", googlecast.asBoolean()));
         controls.add(createSwitch(CLICKSHARE_NAME, "On", "Off", clickShareApp.asBoolean()));
-        controls.add(createSwitch(ACCESS_OVER_LAN_NAME, "On", "Off", accessOverLan.asBoolean()));
+        controls.add(createSwitch(GOOGLECAST_NAME, "On", "Off", googlecast.asBoolean()));
     }
 
     /**
@@ -700,7 +697,8 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
      * */
     private void v2RequestPersonalizationFeatures(Map<String, String> statistics, List<AdvancedControllableProperty> controls) throws Exception {
         JsonNode personalization = doGet(supportedApiVersion + PERSONALIZATION, JsonNode.class);
-        statistics.put("Personalization#Meeting room name", personalization.get("meetingRoomName").asText());
+        statistics.put(MEETING_ROOM_NAME, "");
+        controls.add(createText(MEETING_ROOM_NAME, personalization.get("meetingRoomName").asText()));
 
         String language = personalization.get("language").asText();
         ArrayNode languageOptions = (ArrayNode) personalization.get("supportedLanguages");

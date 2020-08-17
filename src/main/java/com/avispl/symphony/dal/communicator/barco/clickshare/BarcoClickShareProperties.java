@@ -62,7 +62,6 @@ final class BarcoClickShareProperties {
     public static final String V1_8_ENABLE_AIRPLAY = "ClientAccess/EnableAirplay";
     public static final String V1_8_ENABLE_CLICKSHARE_APP = "ClientAccess/EnableClickShareApp";
     public static final String V1_8_ENABLE_GOOGLECAST = "ClientAccess/EnableGoogleCast";
-    public static final String V1_8_ENABLE_OVER_LAN = "ClientAccess/EnableOverLAN";
 
     /*v1.11 ENDPOINTS*/
     public static final String V1_11_CPU_FAN_SPEED = "DeviceInfo/Sensors/CpuFanSpeed";
@@ -90,6 +89,8 @@ final class BarcoClickShareProperties {
     public static final String FEATURES_GOOGLECAST = "configuration/features/google-cast";
     public static final String FEATURES_BLACKBOARD = "configuration/features/blackboard";
     public static final String FEATURES_AIRPLAY = "configuration/features/airplay";
+    public static final String FEATURES_CLICK_SHARE = "configuration/features/clickshare-app";
+
 
     public static final String POWER_MODE_NAME = "Power Management#Power Mode";
     public static final String POWER_STATUS_NAME = "Power Management#Power Status";
@@ -110,7 +111,6 @@ final class BarcoClickShareProperties {
     public static final String MIRACAST_NAME = "Features#Miracast";
     public static final String GOOGLECAST_NAME = "Features#Googlecast";
     public static final String CLICKSHARE_NAME = "Features#ClickShare App";
-    public static final String ACCESS_OVER_LAN_NAME = "Features#Access Over LAN";
     public static final String BLACKBOARD_SAVING_NAME = "Features#Blackboard saving";
     public static final String SOFTWARE_UPDATE_NAME = "Software Update Type";
     public static final String AIRPLAY_NAME = "Features#Airplay";
@@ -118,6 +118,7 @@ final class BarcoClickShareProperties {
     public static final String AUDIO_OUTPUT_NAME = "Audio Output";
     public static final String LANGUAGE_NAME = "Personalization#Language";
     public static final String WELCOME_MESSAGE_NAME = "Personalization#Welcome message";
+    public static final String MEETING_ROOM_NAME = "Personalization#Meeting room name";
     public static final String REBOOT_NAME = "Reboot";
     public static final String STANDBY_NAME = "Standby";
     public static final String ECO_STANDBY_V2 = "EcoStandby";
