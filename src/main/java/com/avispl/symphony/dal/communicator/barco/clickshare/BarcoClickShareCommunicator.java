@@ -8,6 +8,7 @@ import com.avispl.symphony.api.dal.dto.control.AdvancedControllableProperty;
 import com.avispl.symphony.api.dal.dto.control.ControllableProperty;
 import com.avispl.symphony.api.dal.dto.monitor.ExtendedStatistics;
 import com.avispl.symphony.api.dal.dto.monitor.Statistics;
+import com.avispl.symphony.api.dal.error.CommandFailureException;
 import com.avispl.symphony.api.dal.monitor.Monitorable;
 import com.avispl.symphony.dal.communicator.RestCommunicator;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -603,17 +604,33 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
 
     /**
      * Unpack the JsonNode value for device API v1 to avoid boilerplate code
+     * Some of the resources may be missing/deprecated over the time, in the API versions that are
+     * not released yet. Normally that would lead to error 404. Since this is a singular case so far - it is handled
+     * by catching a particular error, which would indicate that the device itself is available, but the requested
+     * url resource is not. Since there's no way to figure out the exact reason of the 404 in this case, without
+     * knowing all the further deprecations of the resources for particular versions - it's assumed that one of the
+     * predefined urls may only be unavailable in 3 cases: device is down, API is down and resource is deprecated.
+     * First 2 cases are handled by generic /SupportedVersions call.
+     * Also catching error in getApiV1JsonNode method only leaves v2 API behaviour out of this functionality.
      * @param url location to fetch data from
      * @return JsonNode value
-     * @throws Exception during http communication
+     * @throws CommandFailureException during http communication
      */
     private JsonNode getApiV1JsonNode(String url) throws Exception {
-        JsonNode response = doGet(url, JsonNode.class);
-        if(response != null){
-            return response.get("data").get("value");
-        } else {
-            return JsonNodeFactory.instance.objectNode();
+        JsonNode response;
+        try {
+            response = doGet(url, JsonNode.class);
+            if(response != null){
+                return response.get("data").get("value");
+            }
+        } catch (CommandFailureException cfe) {
+            if(cfe.getResponse().contains("Resource does not exist")){
+                logger.debug(String.format("Unable to fetch data from %s. Resource is not available or deprecated.", url));
+            } else {
+                throw cfe;
+            }
         }
+        return JsonNodeFactory.instance.objectNode();
     }
 
     /**
