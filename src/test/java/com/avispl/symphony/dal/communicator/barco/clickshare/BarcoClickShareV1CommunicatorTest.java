@@ -40,7 +40,7 @@ public class BarcoClickShareV1CommunicatorTest {
         Assert.assertEquals(1, statistics.size());
         Assert.assertEquals("1873200822", ((ExtendedStatistics)statistics.get(0)).getStatistics().get("Device Information#Serial Number"));
         Assert.assertEquals("CSE-200+", ((ExtendedStatistics)statistics.get(0)).getStatistics().get("Device Information#Model Name"));
-        Assert.assertEquals(24, ((ExtendedStatistics)statistics.get(0)).getControllableProperties().size());
+        Assert.assertEquals(23, ((ExtendedStatistics)statistics.get(0)).getControllableProperties().size());
     }
 
     @Test
