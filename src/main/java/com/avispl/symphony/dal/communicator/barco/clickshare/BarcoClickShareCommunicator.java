@@ -20,7 +20,14 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.CollectionUtils;
 import com.avispl.symphony.dal.util.StringUtils;
 
-import java.util.*;
+import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -394,8 +401,28 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
         JsonNode deviceInfo = getApiV1JsonNode(supportedApiVersion + V1_DEVICE_INFO);
         JsonNode audioEnabled = getApiV1JsonNode(supportedApiVersion + V1_AUDIO_ENABLED);
 
-        deviceModel = deviceInfo.get("ModelName").asText();
+        setDeviceProperties(statistics, deviceInfo);
+        for(int i = 1; i < deviceInfo.get("Processes").get("ProcessCount").asInt() + 1; i++){
+            JsonNode process = deviceInfo.get("Processes").get("ProcessTable").get(String.valueOf(i));
+            statistics.put(String.format("Processes#%s. %s", i, process.get("Name").asText()), process.get("Status").asText());
+        }
 
+        statistics.put(AUDIO_NAME, "");
+        controls.add(createSwitch(AUDIO_NAME, "enabled", "disabled", audioEnabled.asBoolean()));
+        statistics.put(REBOOT_NAME, "");
+        controls.add(createButton(REBOOT_NAME, REBOOT_NAME, "Rebooting...", V1_REBOOT_GRACE_PERIOD));
+
+        setDisplayStatistics(statistics, controls);
+        setOnScreenTextStatistics(statistics, controls);
+    }
+
+    /**
+     * Set device properties - Device Information, Device Status, Device Sensors
+     * @param statistics map to store statistics data to
+     * @param deviceInfo json object to extract data from
+     */
+    private void setDeviceProperties(Map<String, String> statistics, JsonNode deviceInfo){
+        deviceModel = deviceInfo.get("ModelName").asText();
         statistics.put("Device Information#Article Number", deviceInfo.get("ArticleNumber").asText());
         statistics.put("Device Information#Model Name", deviceModel);
         statistics.put("Device Information#Serial Number", deviceInfo.get("SerialNumber").asText());
@@ -412,19 +439,6 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
         statistics.put("Device Sensors#Pcie Temperature (C)", deviceInfo.get("Sensors").get("PcieTemperature").asText());
         statistics.put("Device Sensors#Sio Temperature (C)", deviceInfo.get("Sensors").get("SioTemperature").asText());
         addStatisticsProperty(statistics, "Last used", deviceInfo.get("LastUsed"));
-
-        for(int i = 1; i < deviceInfo.get("Processes").get("ProcessCount").asInt() + 1; i++){
-            JsonNode process = deviceInfo.get("Processes").get("ProcessTable").get(String.valueOf(i));
-            statistics.put(String.format("Processes#%s. %s", i, process.get("Name").asText()), process.get("Status").asText());
-        }
-
-        statistics.put(AUDIO_NAME, "");
-        controls.add(createSwitch(AUDIO_NAME, "enabled", "disabled", audioEnabled.asBoolean()));
-        statistics.put(REBOOT_NAME, "");
-        controls.add(createButton(REBOOT_NAME, REBOOT_NAME, "Rebooting...", V1_REBOOT_GRACE_PERIOD));
-
-        setDisplayStatistics(statistics, controls);
-        setOnScreenTextStatistics(statistics, controls);
     }
 
     /**
@@ -836,12 +850,21 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
      * @param key key to retrieve network related properties from json
      * @param statistics map to save statistics data to
      * */
-    private void populateNetworkConfigurationData(JsonNode node, String key, Map<String, String> statistics){
+    private void populateNetworkConfigurationData(JsonNode node, String key, Map<String, String> statistics) {
         ArrayNode networkProperties = (ArrayNode) node.get(key);
         if(networkProperties.size() == 0){
             return;
         }
-        networkProperties.elements().forEachRemaining(jsonNode -> {
+        networkProperties.elements().forEachRemaining(jsonNode -> setNetworkData(jsonNode, key, statistics));
+    }
+
+    /**
+     * Extract network data from a particular node
+     * @param jsonNode json node that contains specific network-related info
+     * @param key key to retrieve network related properties from json
+     * @param statistics map to save statistics data to
+     */
+    private void setNetworkData(JsonNode jsonNode, String key, Map<String, String> statistics) {
             int id = jsonNode.get("id").asInt();
             addStatisticsProperty(statistics, String.format("Network configuration: %s#Configuration %s Operation Mode", key, id), jsonNode.get("operationMode"));
             addStatisticsProperty(statistics, String.format("Network configuration: %s#Configuration %s Addressing", key, id), jsonNode.get("addressing"));
@@ -850,7 +873,6 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
             addStatisticsProperty(statistics, String.format("Network configuration: %s#Configuration %s Subnet Mask", key, id), jsonNode.get("subnetMask"));
             addStatisticsProperty(statistics, String.format("Network configuration: %s#Configuration %s Default Gateway", key, id), jsonNode.get("defaultGateway"));
             addStatisticsProperty(statistics, String.format("Network configuration: %s#Configuration %s MAC Address", key, id), jsonNode.get("macAddress"));
-        });
     }
 
     /**
