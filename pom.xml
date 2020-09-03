@@ -6,7 +6,7 @@
 
     <groupId>com.avispl.symphony.dal.device.barco.clickshare</groupId>
     <artifactId>symphony-dal-communicator-barco-clickshare</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <properties>
         <symphonyApiVersion>RELEASE</symphonyApiVersion>
     </properties>
