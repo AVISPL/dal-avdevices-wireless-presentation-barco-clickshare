@@ -19,8 +19,9 @@ public class BarcoClickShareCommunicatorTest {
     private static final int port = 4003;
 
     private BarcoClickShareCommunicator communicator;
+
     @BeforeEach
-    public void setUp() throws Exception {
+    public void init() throws Exception {
         communicator = new BarcoClickShareCommunicator();
         communicator.setTrustAllCertificates(true);
         communicator.setHost(host);
