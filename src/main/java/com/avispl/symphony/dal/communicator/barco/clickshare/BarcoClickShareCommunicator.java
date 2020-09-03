@@ -285,10 +285,14 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
             Map<String, String> statistics = new HashMap<>();
             List<AdvancedControllableProperty> controls = new ArrayList<>();
 
-            if(supportedApiVersion.contains("v1")){
-                v1ApiRoute(statistics, controls);
-            } else if(supportedApiVersion.contains("v2")){
-                v2ApiRoute(statistics, controls);
+            try {
+                if(supportedApiVersion.contains("v1")){
+                    v1ApiRoute(statistics, controls);
+                } else if(supportedApiVersion.contains("v2")){
+                    v2ApiRoute(statistics, controls);
+                }
+            } catch (Exception e){
+                logger.error("Error during fetching statistics properties: " + e.getMessage());
             }
 
             extendedStatistics.setStatistics(statistics);
@@ -433,11 +437,11 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
         statistics.put("Device Status#In Use", deviceInfo.get("InUse").asText());
         statistics.put("Device Status#Status", DEVICE_STATUSES.get(deviceInfo.get("Status").asInt()));
         statistics.put("Device Status#Sharing", deviceInfo.get("Sharing").asText());
-        addStatisticsProperty(statistics, "Device Status#Status Message", deviceInfo.get("StatusMessage"));
 
-        statistics.put("Device Sensors#Cpu Temperature (C)", deviceInfo.get("Sensors").get("CpuTemperature").asText());
-        statistics.put("Device Sensors#Pcie Temperature (C)", deviceInfo.get("Sensors").get("PcieTemperature").asText());
-        statistics.put("Device Sensors#Sio Temperature (C)", deviceInfo.get("Sensors").get("SioTemperature").asText());
+        addStatisticsProperty(statistics, "Device Status#Status Message", deviceInfo.get("StatusMessage"));
+        addStatisticsProperty(statistics, "Device Sensors#Cpu Temperature (C)", deviceInfo.get("Sensors").get("CpuTemperature"));
+        addStatisticsProperty(statistics, "Device Sensors#Pcie Temperature (C)", deviceInfo.get("Sensors").get("PcieTemperature"));
+        addStatisticsProperty(statistics, "Device Sensors#Sio Temperature (C)", deviceInfo.get("Sensors").get("SioTemperature"));
         addStatisticsProperty(statistics, "Last used", deviceInfo.get("LastUsed"));
     }
 
@@ -449,21 +453,21 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
      */
     private void setOnScreenTextStatistics(Map<String, String> statistics, List<AdvancedControllableProperty> controls) throws Exception{
         JsonNode display = getApiV1JsonNode(supportedApiVersion + V1_ON_SCREEN_TEXT);
-        statistics.put("On Screen Text#Location", display.get("Location").asText());
+        addStatisticsProperty(statistics, "On Screen Text#Location", display.get("Location"));
 
-        statistics.put(ONSCREEN_LANGUAGE_NAME, "");
+        addStatisticsProperty(statistics, ONSCREEN_LANGUAGE_NAME, display.get("Language"));
         controls.add(createDropdown(ONSCREEN_LANGUAGE_NAME, display.get("Language").asText(), Arrays.asList(display.get("SupportedLanguages").asText().split(","))));
 
-        statistics.put(ONSCREEN_WELCOME_MESSAGE_NAME, "");
+        addStatisticsProperty(statistics, ONSCREEN_WELCOME_MESSAGE_NAME, display.get("WelcomeMessage"));
         controls.add(createText(ONSCREEN_WELCOME_MESSAGE_NAME, display.get("WelcomeMessage").asText()));
 
-        statistics.put(ONSCREEN_MEETING_ROOM_NAME, "");
+        addStatisticsProperty(statistics, ONSCREEN_MEETING_ROOM_NAME, display.get("MeetingRoomName"));
         controls.add(createText(ONSCREEN_MEETING_ROOM_NAME, display.get("MeetingRoomName").asText()));
 
-        statistics.put(ONSCREEN_MEETING_ROOM_INFO_NAME, "");
+        addStatisticsProperty(statistics, ONSCREEN_MEETING_ROOM_INFO_NAME, display.get("ShowNetworkInfo"));
         controls.add(createSwitch(ONSCREEN_MEETING_ROOM_INFO_NAME, "On", "Off", display.get("ShowNetworkInfo").asBoolean()));
 
-        statistics.put(ONSCREEN_NETWORK_INFO_NAME, "");
+        addStatisticsProperty(statistics, ONSCREEN_NETWORK_INFO_NAME, display.get("ShowMeetingRoomInfo"));
         controls.add(createSwitch(ONSCREEN_NETWORK_INFO_NAME, "On", "Off", display.get("ShowMeetingRoomInfo").asBoolean()));
     }
 
@@ -479,15 +483,17 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
         controls.add(createSwitch(DISPLAY_STANDBY_NAME, "On", "Off", display.get("StandbyState").asBoolean()));
 
         statistics.put("Display#Display Count", display.get("DisplayCount").asText());
-        statistics.put(DISPLAY_TIMEOUT_NAME, "");
+
+        addStatisticsProperty(statistics, DISPLAY_TIMEOUT_NAME, display.get("DisplayTimeout"));
         controls.add(createDropdown(DISPLAY_TIMEOUT_NAME, display.get("DisplayTimeout").asText(), deviceModel.equals(CSE800) ? CSE800_DISPLAY_TIMEOUTS : TIMEOUTS));
 
-        statistics.put(DISPLAY_HOTPLUG_NAME, "");
+        addStatisticsProperty(statistics, DISPLAY_HOTPLUG_NAME, display.get("HotPlug"));
         controls.add(createSwitch(DISPLAY_HOTPLUG_NAME, "On", "Off", display.get("HotPlug").asBoolean()));
-        statistics.put(SCREENSAVER_TIMEOUT_NAME, "");
+
+        addStatisticsProperty(statistics, SCREENSAVER_TIMEOUT_NAME, display.get("ScreenSaverTimeout"));
         controls.add(createDropdown(SCREENSAVER_TIMEOUT_NAME, display.get("ScreenSaverTimeout").asText(), TIMEOUTS));
 
-        statistics.put(DISPLAY_WALLPAPER, "");
+        addStatisticsProperty(statistics, DISPLAY_WALLPAPER, display.get("ShowWallpaper"));
         controls.add(createSwitch(DISPLAY_WALLPAPER, "On", "Off", display.get("ShowWallpaper").asBoolean()));
 
         for(int i = 1; i < display.get("OutputCount").asInt() + 1; i++){
@@ -542,10 +548,11 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
      * @throws Exception during http communication
      */
     private void v1_6_RequestDeviceInfo(Map<String, String> statistics, List<AdvancedControllableProperty> controls) throws Exception {
-        String powerStatusName = getApiV1JsonNode(supportedApiVersion + V1_6_SYSTEM_STATE).asText();
-        statistics.put(POWER_STATUS_NAME, powerStatusName);
-        statistics.put(STANDBY_NAME, "");
-        controls.add(createSwitch(STANDBY_NAME, "On", "Off", powerStatusName.equals("Standby")));
+        JsonNode powerStatusName = getApiV1JsonNode(supportedApiVersion + V1_6_SYSTEM_STATE);
+
+        addStatisticsProperty(statistics, POWER_STATUS_NAME, powerStatusName);
+        addStatisticsProperty(statistics, STANDBY_NAME, powerStatusName);
+        controls.add(createSwitch(STANDBY_NAME, "On", "Off", powerStatusName.asText().equals("Standby")));
     }
 
     /**
@@ -555,11 +562,14 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
      * @throws Exception during http communication
      */
     private void v1_7_RequestDeviceInfo(Map<String, String> statistics, List<AdvancedControllableProperty> controls) throws Exception {
-        statistics.put(BLACKBOARD_SAVING_NAME, "");
-        statistics.put(SOFTWARE_UPDATE_NAME, "");
+        JsonNode blackboardSaving = getApiV1JsonNode(supportedApiVersion + V1_7_BLACKBOARD_SAVING);
+        JsonNode softwareUpdateName = getApiV1JsonNode(supportedApiVersion + V1_7_UPDATE_TYPE);
 
-        controls.add(createSwitch(BLACKBOARD_SAVING_NAME, "On", "Off", getApiV1JsonNode(supportedApiVersion + V1_7_BLACKBOARD_SAVING).asBoolean()));
-        controls.add(createDropdown(SOFTWARE_UPDATE_NAME, getApiV1JsonNode(supportedApiVersion + V1_7_UPDATE_TYPE).asText(), SOFTWARE_UPDATE_TYPES));
+        addStatisticsProperty(statistics, BLACKBOARD_SAVING_NAME, blackboardSaving);
+        addStatisticsProperty(statistics, SOFTWARE_UPDATE_NAME, softwareUpdateName);
+
+        controls.add(createSwitch(BLACKBOARD_SAVING_NAME, "On", "Off", blackboardSaving.asBoolean()));
+        controls.add(createDropdown(SOFTWARE_UPDATE_NAME, softwareUpdateName.asText(), SOFTWARE_UPDATE_TYPES));
     }
 
     /**
@@ -601,8 +611,9 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
      * @throws Exception during http communication
      */
     private void v1_13_RequestDeviceInfo(Map<String, String> statistics, List<AdvancedControllableProperty> controls) throws Exception {
-        statistics.put(MIRACAST_NAME, "");
-        controls.add(createSwitch(MIRACAST_NAME, "enabled", "disabled", getApiV1JsonNode(supportedApiVersion + V1_13_ENABLE_MIRACAST).asBoolean()));
+        JsonNode enableMiracast = getApiV1JsonNode(supportedApiVersion + V1_13_ENABLE_MIRACAST);
+        addStatisticsProperty(statistics, MIRACAST_NAME, enableMiracast);
+        controls.add(createSwitch(MIRACAST_NAME, "enabled", "disabled", enableMiracast.asBoolean()));
     }
 
     /**
@@ -612,8 +623,9 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
      * @throws Exception during http communication
      */
     private void v1_14_RequestDeviceInfo(Map<String, String> statistics, List<AdvancedControllableProperty> controls) throws Exception {
-        statistics.put(SCREENSAVER_MODE_NAME, "");
-        controls.add(createDropdown(SCREENSAVER_MODE_NAME, getApiV1JsonNode(supportedApiVersion + V1_14_SCREEN_SAVER_MODE).asText(), SCREENSAVER_MODE_NAMES));
+        JsonNode screensaverMode = getApiV1JsonNode(supportedApiVersion + V1_14_SCREEN_SAVER_MODE);
+        addStatisticsProperty(statistics, SCREENSAVER_MODE_NAME, screensaverMode);
+        controls.add(createDropdown(SCREENSAVER_MODE_NAME, screensaverMode.asText(), SCREENSAVER_MODE_NAMES));
     }
 
     /**
@@ -883,7 +895,7 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
      * @param node to extract textual data from
      * */
     private void addStatisticsProperty(Map<String, String> statistics, String name, JsonNode node){
-        if(node != null && !node.isNull() && node.isTextual()){
+        if(node != null && !node.isNull()){
             String value = node.asText();
             if(!StringUtils.isNullOrEmpty(value.trim())) {
                 statistics.put(name, value);
