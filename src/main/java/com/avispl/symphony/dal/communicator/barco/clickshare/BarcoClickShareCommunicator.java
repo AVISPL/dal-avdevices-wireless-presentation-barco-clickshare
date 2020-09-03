@@ -549,10 +549,16 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
      */
     private void v1_6_RequestDeviceInfo(Map<String, String> statistics, List<AdvancedControllableProperty> controls) throws Exception {
         JsonNode powerStatusName = getApiV1JsonNode(supportedApiVersion + V1_6_SYSTEM_STATE);
+        JsonNode standbyStatus = getApiV1JsonNode(supportedApiVersion + V1_6_REQUEST_STANDBY);
 
-        addStatisticsProperty(statistics, POWER_STATUS_NAME, powerStatusName);
-        addStatisticsProperty(statistics, STANDBY_NAME, powerStatusName);
-        controls.add(createSwitch(STANDBY_NAME, "On", "Off", powerStatusName.asText().equals("Standby")));
+        statistics.put(STANDBY_NAME, "");
+
+        if(!powerStatusName.asText().isEmpty()){
+            addStatisticsProperty(statistics, POWER_STATUS_NAME, powerStatusName);
+            controls.add(createSwitch(STANDBY_NAME, "On", "Off", powerStatusName.asText().equals("Standby")));
+        } else if (!standbyStatus.asText().isEmpty()){
+            controls.add(createSwitch(STANDBY_NAME, "On", "Off", standbyStatus.asBoolean()));
+        }
     }
 
     /**
