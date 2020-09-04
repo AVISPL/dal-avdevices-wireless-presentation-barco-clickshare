@@ -25,6 +25,7 @@ final class BarcoClickShareProperties {
     public static final List<String> CSE800_ENERGY_MODES_LABELS = Arrays.asList("eco_standby", "networked_standby (enable CNI)");
     public static final List<String> SOFTWARE_UPDATE_TYPES = Arrays.asList("AUTOMATIC", "NOTIFY", "OFF");
     public static final List<String> SCREENSAVER_MODE_NAMES = Arrays.asList("Default", "HDMI");
+    public static final List<String> DISPLAY_MODE_NAMES = Arrays.asList("Extended", "Clone", "Span");
 
     /*V1 ENDPOINTS*/
     public static final String V1_RESTART_SYSTEM = "Configuration/RestartSystem";
@@ -32,6 +33,7 @@ final class BarcoClickShareProperties {
     public static final String V1_DISPLAY_TIMEOUT = "Display/DisplayTimeout";
     public static final String V1_DISPLAY_STANDBY_STATE = "Display/StandbyState";
     public static final String V1_DISPLAY_HOT_PLUG = "Display/HotPlug";
+    public static final String V1_DISPLAY_MODE = "Display/Mode";
     public static final String V1_SCREENSAVER_TIMEOUT = "Display/ScreenSaverTimeout";
     public static final String V1_SHOW_WALLPAPER = "Display/ShowWallpaper";
     public static final String V1_DISPLAY_RESOLUTION = "Display/OutputTable/%s/Resolution";
@@ -105,6 +107,7 @@ final class BarcoClickShareProperties {
     public static final String DISPLAY_STANDBY_NAME = "Display#Standby";
     public static final String DISPLAY_HOTPLUG_NAME = "Display#Hot Plug";
     public static final String DISPLAY_WALLPAPER = "Display#Show Wallpaper";
+    public static final String DISPLAY_MODE = "Display#Mode";
     public static final String SCREENSAVER_MODE_NAME = "Display#Screensaver Mode";
     public static final String SCREENSAVER_TIMEOUT_NAME = "Display#Screensaver Timeout";
     public static final String VIDEO_MODE_NAME = "Video Mode";
