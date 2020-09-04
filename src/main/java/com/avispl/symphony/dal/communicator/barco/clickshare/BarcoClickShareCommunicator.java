@@ -225,6 +225,9 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
                     case DISPLAY_WALLPAPER:
                         putDeviceMode(V1_SHOW_WALLPAPER, "value",  "0".equals(value) ? "false" : "true", property);
                         break;
+                    case DISPLAY_MODE:
+                        putDeviceMode(V1_DISPLAY_MODE, "value", value, property);
+                        break;
                     case DISPLAY_HOTPLUG_NAME:
                         putDeviceMode(V1_DISPLAY_HOT_PLUG, "value", "0".equals(value) ? "false" : "true", property);
                         break;
@@ -495,6 +498,12 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
 
         addStatisticsProperty(statistics, DISPLAY_WALLPAPER, display.get("ShowWallpaper"));
         controls.add(createSwitch(DISPLAY_WALLPAPER, "On", "Off", display.get("ShowWallpaper").asBoolean()));
+
+        if(deviceModel.equals(CSE800)) {
+            JsonNode displayMode = display.get("Mode");
+            statistics.put(DISPLAY_MODE, displayMode.asText());
+            controls.add(createDropdown(DISPLAY_MODE, displayMode.asText(), DISPLAY_MODE_NAMES));
+        }
 
         for(int i = 1; i < display.get("OutputCount").asInt() + 1; i++){
             JsonNode currentNode = display.get("OutputTable").get(String.valueOf(i));
