@@ -14,7 +14,6 @@ import com.avispl.symphony.dal.communicator.RestCommunicator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import org.apache.http.entity.ContentType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.CollectionUtils;
@@ -392,7 +391,7 @@ public class BarcoClickShareCommunicator extends RestCommunicator implements Mon
     @Override
     protected HttpHeaders putExtraRequestHeaders(HttpMethod httpMethod, String uri, HttpHeaders headers) throws Exception {
         if(httpMethod.equals(HttpMethod.PATCH) || httpMethod.equals(HttpMethod.PUT)){
-            headers.set(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+            headers.set(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
         }
         headers.set("Authorization", "Basic " + encodedCreds);
         return super.putExtraRequestHeaders(httpMethod, uri, headers);
